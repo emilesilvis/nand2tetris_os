@@ -133,17 +133,70 @@ class Math {
 
     /** Returns the integer part of the square root of x. */
     function int sqrt(int x) {
-        return 333;
+        var int intSqrt, bit, temp, tempSquared;
+        
+        // Handle edge cases
+        if (x < 0) {
+            return 0; // Cannot take square root of negative number
+        }
+        if (x = 0) {
+            return 0;
+        }
+        if (x = 1) {
+            return 1;
+        }
+        
+        let intSqrt = 0;
+        
+        // Start from bit = n/2 - 1 where n is the bit length of x
+        // For 16-bit integers, we start from bit 7 (since n/2 = 8, so 8-1 = 7)
+        let bit = (Math.bitLength(x) / 2);
+        if (bit > 7) {
+            let bit = 7; // Cap at 7 for 16-bit integers
+        }
+        
+        // Iterate from bit down to 0
+        while (bit > -1) {
+            let temp = intSqrt + twoToThe[bit];
+            let tempSquared = temp * temp;
+            
+            // Check if (intSqrt + 2^bit)^2 <= x
+            if ((tempSquared > 0) & (~(tempSquared > x))) {
+                let intSqrt = temp;
+            }
+            
+            let bit = bit - 1;
+        }
+        
+        return intSqrt;
+    }
+
+    function int bitLength(int x) {
+        var int n;
+        let n = 0;
+        while (x > 0) {
+            let x = x / 2; 
+            let n = n + 1;
+        }
+        return n;
     }
 
     /** Returns the greater value. */
     function int max(int a, int b) {
-        return 444;
+        if (a > b) {
+            return a;
+        } else {
+            return b;
+        }
     }
 
     /** Returns the smaller value. */
     function int min(int a, int b) {
-        return 555;
+        if (a < b) {
+            return a;
+        } else {
+            return b;
+        }
     }
 
     /** Returns the absolute value of x. */
