@@ -83,26 +83,51 @@ class Math {
      *     return 2*q + 1  // Can fit one more y
      */
     function int divide(int x, int y) {
+        var int result;
+        var boolean negResult;
+        
+        // Handle division by zero
+        if (y = 0) {
+            return 0; // or could error
+        }
+        
+        // Determine if result should be negative
+        let negResult = false;
+        if (x < 0) {
+            let negResult = ~negResult;
+            let x = Math.abs(x);
+        }
+        if (y < 0) {
+            let negResult = ~negResult;
+            let y = Math.abs(y);
+        }
+        
+        let result = Math.divideHelper(x, y);
+        
+        if (negResult) {
+            return -result;
+        } else {
+            return result;
+        }
+    }
+    
+    function int divideHelper(int x, int y) {
         var int q;
 
-        if (x = 0) {
+        // Base case: if y > x or if 2*y would overflow (y becomes negative)
+        if ((y > x) | (y < 0)) {
             return 0;
         }
 
-        if (y = 0) {
-            return 0;
-        }
+        let q = Math.divideHelper(x, 2*y);
 
-        if (y > x) {
-            return 0;
-        }
-
-        let q = Math.divide(x, 2*y);
-
-        if ((x - 2*y*q) < y) {
+        // Check if the remainder (x - 2*y*q) is less than y
+        // If remainder < y, then we can't fit another y, so return 2*q
+        // If remainder >= y, then we can fit one more y, so return 2*q + 1
+        if ((x - (2*y*q)) < y) {
             return 2*q;
         } else {
-            return 2*q+1;
+            return (2*q) + 1;
         }
     }
 
@@ -123,6 +148,10 @@ class Math {
 
     /** Returns the absolute value of x. */
     function int abs(int x) {
-        return 666;
+        if (x < 0) {
+            return -x;
+        } else {
+            return x;
+        }
     }
 }
