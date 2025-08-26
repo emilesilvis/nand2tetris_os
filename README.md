@@ -19,5 +19,4 @@ Each module includes test suites with expected outputs.
 
 ## Requirements
 
-- Python 3.x
-- No external dependencies
+- Jack compiler, available in the online IDE (https://nand2tetris.github.io/web-ide/vm)
