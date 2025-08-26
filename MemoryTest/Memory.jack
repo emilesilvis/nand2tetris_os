@@ -7,34 +7,112 @@
  * consists of 32,768 words, each holding a 16-bit binary number.
  */ 
 class Memory {
-    static Array RAM;
+    static Array ram;
+    static Array heap;
+    static int freelist;
 
     /** Initializes the class. */
     function void init() {
-        let RAM = 0;
+        let ram = 0;
+
+        let heap = 2048; // Heap base
+        let freelist = 2048; // Pointer of linked list that will live in heap itself
+        // We initialise the freelist with a block consisting of the entire heap.
+        // Every free block in the freelist stores a two-word header:
+        // 1. Address of the next free block
+        // 2. Length of block
+        let heap[0] = 0; // Next
+        let heap[1] = 14335; // Length
+
         return;
     }
 
     /** Returns the RAM value at the given address. */
     function int peek(int address) {
-        return RAM[address];
+        return ram[address];
     }
 
     /** Sets the RAM value at the given address to the given value. */
     function void poke(int address, int value) {
-        let RAM[address] = value;
+        let ram[address] = value;
         return;
     }
 
     /** Finds an available RAM block of the given size and returns
      *  a reference to its base address. */
-    function int alloc(int size) {
-        return;
+    function Array alloc(int size) {
+        var int currentBlock, previousBlock, availableSize, newFreeBlock;
+        var int totalNeeded;
+
+        // Start at beginning of free list
+        let currentBlock = freelist;
+        let previousBlock = 0;
+        let totalNeeded = size + 2; // User data + 2-word header
+
+        // Walk through free list looking for suitable block
+        while (~(currentBlock = 0)) {
+            let availableSize = heap[currentBlock + 1];
+            
+            // Check if this block is big enough
+            if (~(availableSize < totalNeeded)) {
+                
+                // Perfect fit - use entire block
+                if (availableSize = totalNeeded) {
+                    // Remove this block from free list
+                    if (previousBlock = 0) { 
+                        let freelist = heap[currentBlock]; // Update list head
+                    } else {
+                        let heap[previousBlock] = heap[currentBlock]; // Skip current block
+                    }
+                    
+                // Block bigger than what is needed - split it
+                } else {
+                    // Create new free block from leftover space
+                    let newFreeBlock = currentBlock + totalNeeded;
+                    let heap[newFreeBlock] = heap[currentBlock]; // Copy next pointer
+                    let heap[newFreeBlock + 1] = availableSize - totalNeeded; // Remaining size
+
+                    // Replace current block with new smaller block in free list
+                    if (previousBlock = 0) {
+                        let freelist = newFreeBlock;
+                    } else {
+                        let heap[previousBlock] = newFreeBlock;
+                    }
+                }
+
+                // Mark allocated block (not in free list anymore)
+                let heap[currentBlock] = 0;
+                let heap[currentBlock + 1] = totalNeeded;
+
+                // Return pointer to usable memory (skip 2-word header)
+                return currentBlock + 2;
+            }
+
+            // Move to next block in free list
+            let previousBlock = currentBlock;
+            let currentBlock = heap[currentBlock]; // heap[currentBlock] contains pointer to next block
+        }
+
+        // No block found that fits
+        return 0;
     }
 
     /** De-allocates the given object (cast as an array) by making
      *  it available for future allocations. */
     function void deAlloc(Array o) {
+        var int blockToFree, blockSize;
+        
+        // Get actual block address (o points to data, block starts 2 words earlier)
+        let blockToFree = o - 2;
+        
+        // Get size from block header
+        let blockSize = heap[blockToFree + 1];
+        
+        // Add block back to front of free list (simple approach)
+        let heap[blockToFree] = freelist;        // Point to current first free block
+        let heap[blockToFree + 1] = blockSize;   // Keep original size
+        let freelist = blockToFree;              // Make this the new first free block
+        
         return;
     }    
 }
