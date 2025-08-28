@@ -19,4 +19,4 @@ Each module includes test suites with expected outputs.
 
 ## Requirements
 
-- Jack compiler, available in the online IDE (https://nand2tetris.github.io/web-ide/vm)
+- Jack compiler, available in the online IDE (https://nand2tetris.github.io/web-ide/vm) 
