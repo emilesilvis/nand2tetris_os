@@ -80,12 +80,61 @@ class Screen {
 
     /** Draws a line from pixel (x1,y1) to pixel (x2,y2), using the current color. */
     function void drawLine(int x1, int y1, int x2, int y2) {
+        var int distanceX, distanceY, stepX, stepY, error;
+        var int xDirection, yDirection;
+        
+        if (x2 > x1) {
+            let distanceX = x2 - x1;
+            let xDirection = 1;          // ADD: Going right
+        } else {
+            let distanceX = x1 - x2;
+            let xDirection = -1;         // ADD: Going left
+        }
+
+        if (y2 > y1) {
+            let distanceY = y2 - y1;
+            let yDirection = 1;
+        } else {
+            let distanceY = y1 - y2;
+            let yDirection = -1;
+        }
+        
+        let stepX = 0;
+        let stepY = 0;
+        let error = distanceY - distanceX;
+
+        while((stepX < distanceX) | (stepY < distanceY)) {
+            do Screen.drawPixel(x1 + (stepX * xDirection), y1 + (stepY * yDirection));
+            
+            if (error < 0) {
+                let stepX = stepX + 1;
+                let error = error + distanceY;
+            } else {
+                let stepY = stepY + 1;
+                let error = error - distanceX;
+            }
+        }
         return;
     }
 
     /** Draws a filled rectangle whose top left corner is (x1, y1)
      *  and bottom right corner is (x2,y2), using the current color. */
     function void drawRectangle(int x1, int y1, int x2, int y2) {
+        var int distanceX, distanceY;
+        
+        //let distance = Math.sqrt(((y2-y1)*(y2-y1)) + ((x2-x1)*(x2-x1)));
+
+        let distanceX = x2 - x1;
+        let distanceY = y2 - y1;
+
+        // Top
+        do Screen.drawLine(x1, y1, x1 + distanceX, y1);
+        // Bottom
+        do Screen.drawLine(x1, y1 + distanceY, x1 + distanceX, y1 + distanceY);
+        // Left
+        do Screen.drawLine(x1, y1, x1, y1 + distanceY);
+        // Right
+        do Screen.drawLine(x1 + distanceX, y1, x1 + distanceX, y2);
         return;
     }
 
