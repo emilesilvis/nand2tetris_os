@@ -20,3 +20,7 @@ Each module includes test suites with expected outputs.
 ## Requirements
 
 - Jack compiler, available in the online IDE (https://nand2tetris.github.io/web-ide/vm) 
+
+## Zip
+
+`zip -j os_files.zip ArrayTest/Array.jack KeyboardTest/Keyboard.jack MathTest/Math.jack MemoryTest/Memory.jack OutputTest/Output.jack ScreenTest/Screen.jack StringTest/String.jack SysTest/Sys.jack`

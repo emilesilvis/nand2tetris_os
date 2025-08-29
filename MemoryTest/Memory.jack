@@ -15,14 +15,12 @@ class Memory {
     function void init() {
         let ram = 0;
 
-        let heap = 2048; // Heap base
-        let freelist = 2048; // Pointer of linked list that will live in heap itself
-        // We initialise the freelist with a block consisting of the entire heap.
-        // Every free block in the freelist stores a two-word header:
-        // 1. Address of the next free block
-        // 2. Length of block
-        let heap[0] = 0; // Next
-        let heap[1] = 14335; // Length
+        // Treat heap as absolute RAM; use base 0 and store absolute addresses in freelist
+        let heap = 0;
+        let freelist = 2048;
+        // Initialize a single free block covering 2048..16383 inclusive (14336 words)
+        let heap[2048] = 0;     // Next
+        let heap[2049] = 14336; // Length
 
         return;
     }
