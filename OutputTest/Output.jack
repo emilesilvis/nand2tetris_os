@@ -15,10 +15,17 @@
 class Output {
 
     // Character map for displaying characters
-    static Array charMaps; 
+    static Array charMaps;
+
+    static int cursorI, cursorJ; 
 
     /** Initializes the screen, and locates the cursor at the screen's top-left. */
     function void init() {
+        do Output.initMap();
+        let cursorI = 0;
+        let cursorJ = 0;
+
+        return;
     }
 
     // Initializes the character map array
@@ -69,7 +76,7 @@ class Output {
         do Output.create(64,30,51,51,59,59,59,27,3,30,0,0);  // @
         do Output.create(63,30,51,51,24,12,12,0,12,12,0,0);  // ?
 
-        do Output.create(65,0,0,0,0,0,0,0,0,0,0,0);          // A ** TO BE FILLED **
+        do Output.create(65,12,30,51,51,63,51,51,51,51,0,0); // A
         do Output.create(66,31,51,51,51,31,51,51,51,31,0,0); // B
         do Output.create(67,28,54,35,3,3,3,35,54,28,0,0);    // C
         do Output.create(68,15,27,51,51,51,51,51,27,15,0,0); // D
@@ -141,9 +148,9 @@ class Output {
     // Creates the character map array of the given character index, using the given values.
     function void create(int index, int a, int b, int c, int d, int e,
                          int f, int g, int h, int i, int j, int k) {
-	var Array map;
+	    var Array map;
 
-	let map = Array.new(11);
+	    let map = Array.new(11);
         let charMaps[index] = map;
 
         let map[0] = a;
@@ -174,28 +181,107 @@ class Output {
     /** Moves the cursor to the j-th column of the i-th row,
      *  and erases the character displayed there. */
     function void moveCursor(int i, int j) {
+		if((i < 0) | (j < 0) | (i > 22) | (j > 63)){
+			do Sys.error(20);
+		}
+		let cursorI = i;
+		let cursorJ = j;
+		return;
     }
 
     /** Displays the given character at the cursor location,
      *  and advances the cursor one column forward. */
     function void printChar(char c) {
+        var Array map;
+        var int i, value, address, word;
+        var int wordOffset, bitOffset;
+        
+        let map = Output.getMap(c);
+        
+        // Calculate word offset and bit offset within the word
+        let wordOffset = cursorJ / 2;  // Each word contains 2 characters (16 bits / 8 bits per char)
+        let bitOffset = (cursorJ & 1) * 8;  // 0 or 8 depending on odd/even position
+        
+        let i = 0;
+        while (i < 11) {
+            let value = map[i];
+            let address = 16384 + (cursorI * 11 * 32) + (i * 32) + wordOffset;
+            
+            if (bitOffset = 0) {
+                // Character aligned with word boundary (even position)
+                let word = Memory.peek(address);
+                let word = word & (~255);  // Clear lower 8 bits
+                let word = word | value;    // Set character bits
+                do Memory.poke(address, word);
+            } else {
+                // Character in upper byte (odd position)
+                let word = Memory.peek(address);
+                let word = word & 255;      // Keep lower 8 bits
+                let word = word | (value * 256);  // Set upper 8 bits with character
+                do Memory.poke(address, word);
+            }
+            
+            let i = i + 1;
+        }
+        
+        if (cursorJ = 63) {
+            let cursorJ = 0;
+            let cursorI = cursorI + 1;
+            if (cursorI = 23) {
+                let cursorI = 0;
+            }
+        } else {
+            let cursorJ = cursorJ + 1;
+        }
+        
+        return;
     }
 
     /** displays the given string starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printString(String s) {
+        var int i, length;
+        
+        let length = s.length();
+        let i = 0;
+        
+        while (i < length) {
+            do Output.printChar(s.charAt(i));
+            let i = i + 1;
+        }
+        
+        return;
     }
 
     /** Displays the given integer starting at the cursor location,
      *  and advances the cursor appropriately. */
     function void printInt(int i) {
+        var String s;
+        let s = String.new(6); // Max int is 5 digits plus sign
+        do s.setInt(i);
+        do Output.printString(s);
+        do s.dispose();
+        
+        return;
     }
 
     /** Advances the cursor to the beginning of the next line. */
     function void println() {
+        let cursorJ = 0;
+        let cursorI = cursorI + 1;
+        if (cursorI = 23) {
+            let cursorI = 0;
+        }
+        
+        return;
     }
 
     /** Moves the cursor one column back. */
     function void backSpace() {
+	    if(cursorJ > 0) {
+		    let cursorJ = cursorJ - 1;
+		}
+
+        return;
     }
 }
